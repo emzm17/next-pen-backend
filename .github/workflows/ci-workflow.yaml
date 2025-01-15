@@ -27,7 +27,6 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd build-server
           docker build \
             -f Dockerfile \
             --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} \
