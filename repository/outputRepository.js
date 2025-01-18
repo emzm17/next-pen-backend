@@ -1,19 +1,11 @@
-import Output from "../schema/output.js"
+import Output from "../schema/Code.js"
 export const add = async (projectId, status) => {
-    const project = await Output.findOne({ projectId });
+    try {
+        await Output.findOneAndUpdate({ _id: projectId },
+            { $push: { status: { status: status, date: new Date() } } },
+            { new: true });
+    } catch (error) {
+        console.error('Error adding status:', error);
 
-    if (project) {
-        // Project exists, add status to the existing project
-        return await Output.findOneAndUpdate(
-            { projectId },
-            { $push: { status: { status } } },
-            { new: true }
-        );
-    } else {
-        // Project doesn't exist, create a new project with the status
-        return await Output.create({
-            projectId,
-            status: [{ status }]
-        });
     }
 };
