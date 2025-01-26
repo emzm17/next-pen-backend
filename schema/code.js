@@ -12,9 +12,9 @@ const outputSchema = new mongoose.Schema({
     },
     language: { type: String, required: true },
     content: { type: String, required: true },
-    status: [statusSchema]
+    statuses: [statusSchema]
 })
 
-const Output = mongoose.model("Output", outputSchema);
+const Code = mongoose.model("Code", outputSchema);
 
-export default Output;
+export default Code;

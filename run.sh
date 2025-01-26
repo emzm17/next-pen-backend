@@ -51,7 +51,7 @@ send_file_to_redis() {
     
     # Read the file line by line and send its content to Redis
     while IFS= read -r line; do
-        send_custom_log "File content: $line" "$PROJECT_ID"  # Send each line of the file to Redis
+        send_custom_log "$line" "$PROJECT_ID"  # Send each line of the file to Redis
     done < "$file_path"
 }
 
