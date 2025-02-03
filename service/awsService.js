@@ -9,10 +9,11 @@ import mime from "mime-types";
 //     console.log("Access Key ID:", credentials.accessKeyId);
 // })();
 export const uploadCode = async (fileName, code, projectId) => {
+    const decodedString = atob(code);
     let fileUrl = null;
     try {
         // Write file and upload to S3
-        fs.writeFileSync(fileName, code);
+        fs.writeFileSync(fileName, decodedString);
         const command = new PutObjectCommand({
             Bucket: "code-bucket",
             Key: `__outputs/${projectId}/${fileName}`,

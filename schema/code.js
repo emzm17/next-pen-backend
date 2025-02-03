@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 
 const statusSchema = new mongoose.Schema({
-    status: String,
+    statusId: { type: Number, required: true },
+    status: { type: [String], default: [] },
     date: { type: Date, default: Date.now }
 });
 
