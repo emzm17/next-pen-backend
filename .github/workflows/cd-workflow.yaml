@@ -22,5 +22,3 @@ jobs:
           port: 22
           script: |
             whoami
-            cd /home/
-            ./deploy.sh  # Running the deploy script
