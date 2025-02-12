@@ -21,4 +21,4 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
-            ./root/home/deploy.sh        # Run the deploy script
+            ./{secrets.SSH_USER}/home/deploy.sh        # Run the deploy script
