@@ -13,13 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@v1.2.0
+      - name: SSH into Server
+        uses: garygrossgarten/github-action-ssh@release
         with:
+          command: ./root/home/deploy.sh
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: 22
-          script: |
-            cd /home/
-            ./deploy.sh  # Running the deploy script
+          username: root
+          user: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD}}
