@@ -16,7 +16,7 @@ jobs:
       - name: SSH into Server
         uses: garygrossgarten/github-action-ssh@release
         with:
-          command: ./home/${{secrets.SSH_USER}}/deploy.sh
+          command: ./deploy.sh
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           user: ${{ secrets.SSH_USER }}
