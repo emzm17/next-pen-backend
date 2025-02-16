@@ -7,7 +7,7 @@ export REDIS_PORT="$REDIS_PORT"
 OUTPUT_DIR="/home/dibya/app"          # Directory where the C++ code and output will reside
 C_CPP_FILE="$OUTPUT_DIR/example.cpp"  # C++ source file in the output directory
 OUTPUT_FILE="$OUTPUT_DIR/example"     # Output executable file
-# INPUT_FILE="$OUTPUT_DIR/in.txt"        # Input file to be provided to C++ program
+INPUT_FILE="$OUTPUT_DIR/in.txt"        # Input file to be provided to C++ program
 REDIS_QUEUE="output"      # Redis channel to push logs
 # Redis server host
                
@@ -82,7 +82,7 @@ run_cpp_and_push_logs() {
 
     # Run the C++ program with input from file and capture both stdout and stderr
     echo "Running C++ program with input from $INPUT_FILE..."
-    "$OUTPUT_FILE" > output.log 2>&1
+    "$OUTPUT_FILE" < "$INPUT_FILE" > output.log 2>&1
 
     # Send the logs of the program execution to Redis
     send_file_to_redis "output.log"
