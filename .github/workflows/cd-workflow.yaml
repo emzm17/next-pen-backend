@@ -18,6 +18,6 @@ jobs:
         with:
           command: ./home/deploy.sh
           host: ${{ secrets.SSH_HOST }}
-          username: root
+          username: ${{ secrets.SSH_USER }}
           user: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD}}
