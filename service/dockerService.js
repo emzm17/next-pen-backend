@@ -8,7 +8,7 @@ export const startDockerContainer = async (url, input_url, project_id) => {
     console.log(input_url);
     try {
         // Construct the Docker command
-        const dockerCommand = `docker run --rm -e R2_URL=${url} -e INPUT_URL=${input_url} -e PROJECT_ID=${project_id} next-pen:latest`;
+        const dockerCommand = `docker run --rm -e R2_URL=${url} -e INPUT_URL=${input_url} -e PROJECT_ID=${project_id} emzm17/next-pen:latest`;
 
         console.log(`Executing Docker command: ${dockerCommand}`);
 
