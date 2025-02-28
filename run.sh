@@ -1,100 +1,78 @@
 #!/bin/bash
-export PROJECT_ID="$PROJECT_ID"
+
 export REDIS_HOST="$REDIS_HOST"
 export REDIS_PORT="$REDIS_PORT"
+TOPIC_NAME="UPDATE_RESULT"
 
-# Define variables
-OUTPUT_DIR="/home/dibya/app"          # Directory where the C++ code and output will reside
-C_CPP_FILE="$OUTPUT_DIR/example.cpp"  # C++ source file in the output directory
-OUTPUT_FILE="$OUTPUT_DIR/example"     # Output executable file
-INPUT_FILE="$OUTPUT_DIR/in.txt"        # Input file to be provided to C++ program
-REDIS_QUEUE="output"      # Redis channel to push logs
-# Redis server host
-               
-
-
-IN_QUEUE=1
-COMPILING=2
-COMPILED=3
-OUTPUT=4
-EXCECUTED=5
-ERROR_COMPILING=6
+# Define directories and files
+OUTPUT_DIR="/home/dibya/app"
+C_CPP_FILE="$OUTPUT_DIR/example.cpp"
+OUTPUT_FILE="$OUTPUT_DIR/example"
+INPUT_FILE="$OUTPUT_DIR/in.txt"
+FINAL_OUTPUT="$OUTPUT_DIR/output.log"
+ENCODED_OUTPUT="$OUTPUT_DIR/output_base64.log"
 
 
 
+# Ensure the output files are empty at the start
+> "$FINAL_OUTPUT"
+> "$ENCODED_OUTPUT"
 
-# Function to compile C++ code from /output directory
+# Function to compile C++ code
 compile_cpp() {
-    echo "Compiling C++ code from $C_CPP_FILE..."
-    send_custom_log "Compiling C++ code" "$PROJECT_ID" "$COMPILING" # Send compiling log to Redis
+    g++ -o "$OUTPUT_FILE" "$C_CPP_FILE" 2> "$FINAL_OUTPUT"
 
-    # Try compiling and capture the error log
-    g++ -o "$OUTPUT_FILE" "$C_CPP_FILE" 2> compile_error.log
     if [ $? -ne 0 ]; then
-        echo "Error compiling C++ code. Check compile_error.log for details."
-        
-        # Read the compile error log and send it to Redis
-        while IFS= read -r line; do
-            send_custom_log "$line" "$PROJECT_ID" "$ERROR_COMPILING"
-        done < compile_error.log
-
+        echo "Compilation failed. Printing error output..."
+        cat "$FINAL_OUTPUT"  # Print error in readable format
+    
+        base64 "$FINAL_OUTPUT" > "$ENCODED_OUTPUT"
+        insert_into_redis "ERROR"  # Store failure flag
         exit 1
     fi
-
-    echo "C++ code compiled successfully."
-    send_custom_log "C++ code compiled successfully." "$PROJECT_ID" "$COMPILED" # Send success log to Redis
 }
 
-# Function to send custom logs to Redis with Project ID
-send_custom_log() {
-    local log_message="$1" # first position of parameter
-    local project_id="$2"  # second position of parameter
-    local status_id="$3"
-
-    # Create JSON formatted log message
-    local formatted_log=$(jq -n --arg projectId "$project_id" --arg logMessage "$log_message"  --arg statusId "$status_id" \
-    '{projectId: $projectId, status: $logMessage , statusId:$statusId}')
-    
-    echo "Sending log to Redis: $formatted_log"
-    redis-cli -h "$REDIS_HOST" -p $REDIS_PORT LPUSH "$REDIS_QUEUE" "$formatted_log"
-
-}
-
-
-# Function to send content of a text file to Redis
-send_file_to_redis() {
-    local file_path="$1"
-    
-    # Read the file line by line and send its content to Redis
-    while IFS= read -r line; do
-        send_custom_log "$line" "$PROJECT_ID" "$OUTPUT" # Send each line of the file to Redis
-    done < "$file_path"
-}
-
-# Function to run the C++ program and push logs and output to Redis
-run_cpp_and_push_logs() {
-    # Check if the compiled C++ file exists
-    if [ ! -f "$OUTPUT_FILE" ]; then
-        echo "Error: C++ program not compiled. Exiting..."
-        send_custom_log "Error: C++ program not compiled. Exiting..." "$PROJECT_ID"  "$ERROR_COMPILING" # Send error log to Redis
-        exit 1
+# Function to run the compiled program and capture output
+run_cpp_and_capture_output() {
+    # "$OUTPUT_FILE" < "$INPUT_FILE" > "$FINAL_OUTPUT" 2> "$FINAL_OUTPUT"
+    if [ -f "$INPUT_FILE" ]; then
+    "$OUTPUT_FILE" < "$INPUT_FILE" > "$FINAL_OUTPUT" 2>&1
+    else
+    "$OUTPUT_FILE" > "$FINAL_OUTPUT" 2>&1
     fi
 
-    # Run the C++ program with input from file and capture both stdout and stderr
-    echo "Running C++ program with input from $INPUT_FILE..."
-    "$OUTPUT_FILE" < "$INPUT_FILE" > output.log 2>&1
-
-    # Send the logs of the program execution to Redis
-    send_file_to_redis "output.log"
-
-    # Send success message to Redis
-    echo "C++ program executed successfully."
-    send_custom_log "C++ program executed successfully." "$PROJECT_ID" "$EXCECUTED" # Send success log to Redis
-
-    # Clean up the output log file
-    # rm -f output.log
+    if [ $? -ne 0 ]; then
+        echo "Execution failed. Encoding error output..."
+        base64 "$FINAL_OUTPUT" > "$ENCODED_OUTPUT"
+        insert_into_redis "ERROR"  # Store failure flag
+        exit 1
+    fi
 }
 
-# Main logic
+# Function to insert Base64-encoded content into MySQL with flag
+insert_into_redis() {
+local status_flag="$1"
+BASE64_CONTENT=$(cat "$ENCODED_OUTPUT")
+
+# Create a JSON message
+MESSAGE=$(jq -n --arg id "$PROJECT_ID" --arg status "$status_flag" --arg result "$BASE64_CONTENT" \
+'{id: $id, status: $status, result: $result}')
+
+# Publish to Redis topic
+redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" PUBLISH "$TOPIC_NAME" "$MESSAGE"
+
+echo "Base64 output with status [$status_flag] published to Redis topic [$TOPIC_NAME] as JSON."
+
+}
+
+# Execute functions
 compile_cpp
-run_cpp_and_push_logs
+run_cpp_and_capture_output
+
+# Convert final output to Base64 and store it
+base64 "$FINAL_OUTPUT" > "$ENCODED_OUTPUT"
+
+# Insert Base64-encoded output with "FLG" for success
+insert_into_redis "COMPLETED"
+
+echo "Execution successful. Base64 output saved in $ENCODED_OUTPUT and stored in MySQL."

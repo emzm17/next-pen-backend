@@ -16,16 +16,30 @@ RUN apt-get update && \
     jq \
     redis-tools \
     wget \
+    mysql-client \
     git && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 
 ARG REDIS_HOST
-ARG REDIS_PORT    
+ARG REDIS_PORT   
+ARG DB_HOST
+ARG DB_USER
+ARG DB_PASS
+ARG DB_NAME
+ARG TABLE_NAME 
+
 
 ENV REDIS_HOST=${REDIS_HOST}
 ENV REDIS_PORT=${REDIS_PORT}
+ENV DB_HOST=${DB_HOST}
+ENV DB_NAME=${DB_NAME}
+ENV DB_PASS=${DB_PASS}
+ENV DB_USER=${DB_USER}
+ENV TABLE_NAME=${TABLE_NAME}
+
+
 
 # Set up a user with limited permissions for running the code (sandboxing)
 
