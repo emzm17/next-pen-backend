@@ -6,12 +6,14 @@
 wget $R2_URL -P /home/dibya/app
 wget $INPUT_URL -P /home/dibya/app
 
+echo $script
+
 # Check if the download was successful
 if [ $? -eq 0 ]; then
     echo "Download completed successfully."
 
     # Now run the run.sh script
-    exec /bin/bash run.sh
+    exec /bin/bash $script
 else
     echo "Download failed. Exiting..."
     exit 1

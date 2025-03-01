@@ -4,11 +4,11 @@ import util from 'util';
 // Promisify the exec function
 const execPromise = util.promisify(exec);
 
-export const startDockerContainer = async (url, test, project_id) => {
+export const startDockerContainer = async (url, test, project_id, script, imageName) => {
     // console.log(input_url);
     try {
         // Construct the Docker command
-        const dockerCommand = `docker run --rm -e R2_URL=${url} -e INPUT_URL=${test}  -e PROJECT_ID=${project_id} next-pen:latest`;
+        const dockerCommand = `docker run --rm -e R2_URL=${url} -e INPUT_URL=${test}  -e PROJECT_ID=${project_id}   -e script=${script} ${imageName}`;
 
         console.log(`Executing Docker command: ${dockerCommand}`);
 

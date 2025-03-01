@@ -11,4 +11,5 @@ export const BASE_URL = process.env.BASE_URL;
 export const FILE_NAME = process.env.fileName;
 export const DB_URL = process.env.DB_URL;
 export const INPUT_FILE = process.env.input;
+export const PYTHON_FILE = process.env.python
 
