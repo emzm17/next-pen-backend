@@ -12,5 +12,8 @@
     "s3": "^4.4.0",
     "util": "^0.12.5"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
 }
