@@ -15,5 +15,10 @@
   "type": "module",
   "devDependencies": {
     "cross-env": "^7.0.3"
+  },
+  "scripts": {
+    "start:dev": "cross-env NODE_ENV=development node index.js",
+    "start:prod": "cross-env NODE_ENV=production node index.js"
   }
+
 }

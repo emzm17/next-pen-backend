@@ -2,7 +2,7 @@
 
 export REDIS_HOST="$REDIS_HOST"
 export REDIS_PORT="$REDIS_PORT"
-TOPIC_NAME="UPDATE_RESULT"
+export TOPIC_NAME="$TOPIC_NAME"
 
 # Define directories and files
 OUTPUT_DIR="/home/dibya/app"

@@ -25,18 +25,30 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
+      - name: Build Docker image 1
         run: |
           docker build \
             -f Dockerfile \
             --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} \
             --build-arg REDIS_PORT=${{ secrets.REDIS_PORT }} \
+            --build-arg TOPIC_NAME=${{secrets.TOPIC_NAME}} \
             --no-cache \
             -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:latest .
+
+      - name: Build Docker image 2
+        run: |
+          docker build \
+            -f Dockerfile \
+            --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} \
+            --build-arg REDIS_PORT=${{ secrets.REDIS_PORT }} \
+            --build-arg TOPIC_NAME=${{secrets.TOPIC_NAME}} \
+            --no-cache \
+            -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE1 }}:latest .
 
       - name: Push Docker images to Docker Hub
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE1 }}:latest
 
       - name: Verify push status
         run: echo "Push image to Docker Hub"
